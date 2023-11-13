@@ -1,4 +1,4 @@
-import { Approval, Transaction } from "../types";
+import { Approval, Transaction, createAlgebraPoolDatasource } from "../types";
 import {
   FrontierEvmEvent,
   FrontierEvmCall,
@@ -6,6 +6,7 @@ import {
 import { BigNumber } from "ethers";
 import assert from "assert";
 import { Position } from "../types/models";
+
 
 // Setup types from ABI
 type TransferEventArgs = [string, string, BigNumber] & {
@@ -58,6 +59,12 @@ export async function handleBurn(
   const bottomTick = event.args?.[3];
  const pos = await Position.remove(getPositionKey(owner,topTick,bottomTick));
   
+}
+
+export async function handlePool(event: FrontierEvmEvent) {
+
+  createAlgebraPoolDatasource({address: event.args?.[2]})
+  logger.info(`Pool added: ${event.args?.[2]}`);
 }
 
 

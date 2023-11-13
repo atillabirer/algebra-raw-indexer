@@ -61,15 +61,7 @@ const project: SubstrateProject<FrontierEvmDatasource> = {
       mapping: {
         file: "./dist/index.js",
         handlers: [
-          {
-            handler: "handleMint",
-            kind: "substrate/FrontierEvmEvent",
-            filter: {
-              topics: [
-                "Mint(address sender,address owner,int24 bottomTick,int24 topTick,uint128 liquidityAmount,uint256 amount0,uint256 amount1)",
-              ],
-            },
-          },
+
           {
             handler: "handleBurn",
             kind: "substrate/FrontierEvmEvent",
@@ -82,7 +74,64 @@ const project: SubstrateProject<FrontierEvmDatasource> = {
         ],
       },
     },
+    {
+      kind: "substrate/FrontierEvm",
+      startBlock: 2649799,
+      processor: {
+        file: "./node_modules/@subql/frontier-evm-processor/dist/bundle.js",
+        options: {
+          abi: "Factory",
+          address: "0xabE1655110112D0E45EF91e94f8d757e4ddBA59C", // FLARE token https://moonscan.io/token/0xe3e43888fa7803cdc7bea478ab327cf1a0dc11a7
+        },
+      },
+
+      assets: new Map([["Factory", { file: "./algebrafactory.abi.json" }]]),
+      mapping: {
+        file: "./dist/index.js",
+        handlers: [
+          {
+            handler: "handlePool",
+            kind: "substrate/FrontierEvmEvent",
+            filter: {
+              topics: [
+                "Pool(address token0,address token1, address pool)"
+              ]
+            }
+          }
+        ]
+      }
+
+
+    }
   ],
+  templates: [
+    {
+      name: "AlgebraPool",
+      kind: "substrate/FrontierEvm",
+      processor: {
+        file: "./node_modules/@subql/frontier-evm-processor/dist/bundle.js",
+        options: {
+          abi: "AlgebraPool"
+        },
+
+      },
+      assets: new Map([["AlgebraPool", { file: "./algebrapool.abi.json" }]]),
+      mapping: {
+        file: "./dist/index.js",
+        handlers: [          {
+          handler: "handleMint",
+          kind: "substrate/FrontierEvmEvent",
+          filter: {
+            topics: [
+              "Mint(address sender,address owner,int24 bottomTick,int24 topTick,uint128 liquidityAmount,uint256 amount0,uint256 amount1)",
+            ],
+          },
+        },]
+      }
+
+
+    }
+  ]
 };
 
 // Must set default to the project instance
