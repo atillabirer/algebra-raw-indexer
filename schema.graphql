@@ -20,6 +20,19 @@ type Approval @entity {
 
 type Position @entity {
   id: ID!
+  owner: String!
   topTick: BigInt!
   bottomTick: BigInt!
+  isActive: Boolean
+  poolAddress: Pool!,
+  liquidityAmount: String!,
+  amount0: String!,
+  amount1: String!
+
+
+}
+
+type Pool @entity {
+  id: ID!
+  positions: [Position] @derivedFrom(field: "poolAddress")
 }

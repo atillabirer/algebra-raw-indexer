@@ -5,7 +5,7 @@ import {
 } from "@subql/frontier-evm-processor";
 import { BigNumber } from "ethers";
 import assert from "assert";
-import { Position } from "../types/models";
+import { Pool, Position } from "../types/models";
 
 
 // Setup types from ABI
@@ -45,7 +45,17 @@ export async function handleMint(
   const owner = event.args?.[1];
   const topTick = event.args?.[2];
   const bottomTick = event.args?.[3];
-  const pos = new Position(getPositionKey(owner,bottomTick,topTick),topTick,bottomTick);
+  const liquidityAmount = event.args?.[4].toString();
+  const token0 = event.args?.[5].toString();
+  const token1 = event.args?.[6].toString();
+  logger.info(`event.address ${event.address}`)
+  logger.info(`token0: ${token0}`);
+  logger.info(`token1: ${token1}`);
+  //event.address == pool address
+  const pos = new Position(getPositionKey(owner,bottomTick,topTick),owner,topTick,bottomTick,event.address.toLowerCase(),liquidityAmount,token0,token1);
+  
+  pos.poolAddressId = event.address.toLowerCase();
+
   
   await pos.save();
 }
@@ -58,12 +68,16 @@ export async function handleBurn(
   const topTick = event.args?.[2];
   const bottomTick = event.args?.[3];
  const pos = await Position.remove(getPositionKey(owner,topTick,bottomTick));
+ logger.info(`eventAddress:${event.address}`);
   
 }
 
 export async function handlePool(event: FrontierEvmEvent) {
 
   createAlgebraPoolDatasource({address: event.args?.[2]})
+  //create pool with tokens
+  const pool = new Pool(event.args?.[2].toLowerCase());
+  pool.save();
   logger.info(`Pool added: ${event.args?.[2]}`);
 }
 

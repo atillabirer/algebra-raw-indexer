@@ -62,15 +62,6 @@ const project: SubstrateProject<FrontierEvmDatasource> = {
         file: "./dist/index.js",
         handlers: [
 
-          {
-            handler: "handleBurn",
-            kind: "substrate/FrontierEvmEvent",
-            filter: {
-              topics: [
-                "Burn(address owner,int24 bottomTick,int24 topTick, uint128 liquidityAmount, uint256 amount0, uint256 amount1)",
-              ],
-            },
-          }
         ],
       },
     },
@@ -118,7 +109,7 @@ const project: SubstrateProject<FrontierEvmDatasource> = {
       assets: new Map([["AlgebraPool", { file: "./algebrapool.abi.json" }]]),
       mapping: {
         file: "./dist/index.js",
-        handlers: [          {
+        handlers: [{
           handler: "handleMint",
           kind: "substrate/FrontierEvmEvent",
           filter: {
@@ -126,7 +117,17 @@ const project: SubstrateProject<FrontierEvmDatasource> = {
               "Mint(address sender,address owner,int24 bottomTick,int24 topTick,uint128 liquidityAmount,uint256 amount0,uint256 amount1)",
             ],
           },
-        },]
+        },
+        {
+          handler: "handleBurn",
+          kind: "substrate/FrontierEvmEvent",
+          filter: {
+            topics: [
+              "Burn(address owner,int24 bottomTick,int24 topTick, uint128 liquidityAmount, uint256 amount0, uint256 amount1)",
+            ],
+          },
+        }
+        ]
       }
 
 
