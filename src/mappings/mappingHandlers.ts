@@ -53,7 +53,14 @@ export async function handleMint(
   logger.info(`token1: ${token1}`);
   //event.address == pool address
   const pos = new Position(getPositionKey(owner,bottomTick,topTick),owner,topTick,bottomTick,event.address.toLowerCase(),liquidityAmount,token0,token1);
-  
+
+  //add liquidity to totalliq
+  //get pool
+  const pool = await Pool.get(event.address.toLowerCase());
+  const prevPoolLiq = BigNumber.from(pool?.totalLiquidity);
+  const newLiq = BigNumber.from(liquidityAmount).add(prevPoolLiq);
+  if(pool) pool.totalLiquidity = newLiq.toString();
+  await pool?.save();
   pos.poolAddressId = event.address.toLowerCase();
 
   
@@ -65,18 +72,25 @@ export async function handleBurn(
 ): Promise<void> {
 
   const owner = event.args?.[0];
+  const bottomTick = event.args?.[1];
   const topTick = event.args?.[2];
-  const bottomTick = event.args?.[3];
+  const liquidityAmount = event.args?.[3];
  const pos = await Position.remove(getPositionKey(owner,topTick,bottomTick));
  logger.info(`eventAddress:${event.address}`);
-  
+
+ const pool = await Pool.get(event.address.toLowerCase());
+ if(pool) {
+ const prevPoolLiq = BigNumber.from(pool?.totalLiquidity);
+ const newLiq = liquidityAmount.sub(prevPoolLiq);
+ pool.totalLiquidity = newLiq.toString();
+ }
 }
 
 export async function handlePool(event: FrontierEvmEvent) {
 
   createAlgebraPoolDatasource({address: event.args?.[2]})
   //create pool with tokens
-  const pool = new Pool(event.args?.[2].toLowerCase());
+  const pool = new Pool(event.args?.[2].toLowerCase(),"0");
   pool.save();
   logger.info(`Pool added: ${event.args?.[2]}`);
 }

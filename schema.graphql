@@ -35,4 +35,5 @@ type Position @entity {
 type Pool @entity {
   id: ID!
   positions: [Position] @derivedFrom(field: "poolAddress")
+  totalLiquidity: String!
 }
